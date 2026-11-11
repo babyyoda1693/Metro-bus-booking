@@ -1,0 +1,68 @@
+:root {
+  --ink: #0e2238;
+  --ink-soft: #35506b;
+  --sign: #ffc933;
+  --sign-deep: #e0a800;
+  --mist: #eef2f6;
+  --line: #d3dce6;
+  --go: #1f9d6b;
+  --stop: #c9453f;
+  --bs-body-font-family: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bs-body-color: var(--ink);
+  --bs-body-bg: var(--mist);
+  --bs-link-color: var(--ink-soft);
+}
+body { font-size: 1rem; line-height: 1.5; }
+h1, h2, h3, .h4, .h5, .board-title { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; letter-spacing: .01em; }
+
+/* Destination-board header: amber on navy, like the sign above a bus windscreen */
+.board { background: var(--ink); color: var(--sign); border-bottom: 6px solid var(--sign); }
+.board-title { font-size: 2.6rem; line-height: 1; text-transform: uppercase; letter-spacing: .06em; }
+.board-sub { color: #f7e3a1; opacity: .9; min-height: 1.5em; }
+.board-nav .nav-link { color: #dbe6f2; border-radius: 4px; font-weight: 600; }
+.board-nav .nav-link:hover { color: #fff; }
+.board-nav .nav-link.active { background: var(--sign); color: var(--ink); }
+
+.btn-signal { background: var(--sign); border-color: var(--sign-deep); color: var(--ink); font-weight: 600; }
+.btn-signal:hover, .btn-signal:focus { background: var(--sign-deep); border-color: var(--sign-deep); color: var(--ink); }
+.btn:focus-visible, .form-control:focus, .form-select:focus, .seat:focus-visible, .nav-link:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; box-shadow: none; }
+
+.search-bar, .panel { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 1rem; margin: 0; }
+.search-bar { --bs-gutter-x: .75rem; }
+.panel { padding: 1.25rem; }
+.form-label { font-weight: 600; margin-bottom: .25rem; }
+.quick-filter { max-width: 260px; }
+
+.table { --bs-table-bg: #fff; border: 1px solid var(--line); }
+.table thead th { background: var(--ink); color: #fff; font-weight: 600; white-space: nowrap; border: 0; }
+.bus-name { font-weight: 600; }
+.bus-id { color: var(--ink-soft); font-size: .85rem; }
+.seats-badge { font-weight: 600; }
+
+.empty-state { background: #fff; border: 2px dashed var(--line); border-radius: 6px; padding: 2.5rem 1rem; text-align: center; }
+.alert-stack { position: fixed; top: 1rem; right: 1rem; z-index: 2000; width: min(420px, calc(100vw - 2rem)); }
+
+/* Seat map */
+.bus-summary { border-bottom: 1px solid var(--line); padding-bottom: .75rem; margin-bottom: .75rem; }
+.bus-summary .route { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 1.6rem; line-height: 1.1; }
+.seat-legend { display: flex; gap: 1rem; font-size: .9rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.seat-key { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 2px solid var(--go); background: #fff; }
+.seat-key.booked { background: #c3ccd6; border-color: #c3ccd6; }
+.seat-key.selected { background: var(--sign); border-color: var(--ink); }
+.bus-body { border: 2px solid var(--ink); border-radius: 28px 28px 8px 8px; padding: .75rem 1rem 1rem; max-width: 320px; margin: 0 auto; background: var(--mist); }
+.driver { text-align: right; color: var(--ink-soft); font-size: .85rem; margin-bottom: .5rem; }
+.seat-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px; }
+.row-no { width: 22px; font-size: .75rem; color: var(--ink-soft); text-align: center; }
+.aisle { width: 22px; }
+.seat, .seat-empty { width: 42px; height: 40px; }
+.seat { border: 2px solid var(--go); background: #fff; border-radius: 6px 6px 3px 3px; font-size: .8rem; font-weight: 600; color: var(--ink); padding: 0; transition: background-color .15s, transform .15s; }
+.seat.available:hover { background: #dff3ea; transform: translateY(-2px); }
+.seat.booked { background: #c3ccd6; border-color: #c3ccd6; color: #6b7a8a; cursor: not-allowed; }
+.seat.selected { background: var(--sign); border-color: var(--ink); }
+
+/* Ticket shown after a booking */
+.ticket { border: 2px dashed var(--ink); border-radius: 6px; padding: 1rem; margin-top: 1.25rem; background: #fffbe8; }
+.ticket .ticket-id { font-family: "Barlow Condensed", sans-serif; font-size: 1.6rem; font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (max-width: 575px) { .board-title { font-size: 2rem; } .seat, .seat-empty { width: 38px; } }

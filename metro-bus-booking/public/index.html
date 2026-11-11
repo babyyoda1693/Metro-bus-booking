@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metro Bus Booking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<header class="board">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
+    <div>
+      <div class="board-title">Metro Bus</div>
+      <div class="board-sub" id="boardTicker">Find a bus, pick your seat, travel.</div>
+    </div>
+    <nav class="nav nav-pills board-nav" id="mainNav">
+      <button class="nav-link active" data-view="buses"><i class="bi bi-search"></i> Find buses</button>
+      <button class="nav-link" data-view="book"><i class="bi bi-ticket-perforated"></i> Book a seat</button>
+      <button class="nav-link" data-view="bookings"><i class="bi bi-journal-check"></i> My bookings</button>
+      <button class="nav-link" data-view="admin"><i class="bi bi-gear"></i> Manage buses</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container py-4">
+  <div id="alertBox" class="alert-stack"></div>
+
+  <!-- FIND BUSES (Bus Search, Route + Schedule lookups) -->
+  <section id="view-buses" class="view">
+    <form id="busSearchForm" class="search-bar row g-2 align-items-end" novalidate>
+      <div class="col-12 col-md-3">
+        <label class="form-label" for="busSearchType">Search by</label>
+        <select id="busSearchType" class="form-select"></select>
+      </div>
+      <div class="col-12 col-md-5">
+        <label class="form-label" for="busSearchValue">Value</label>
+        <input id="busSearchValue" class="form-control" autocomplete="off">
+      </div>
+      <div class="col-12 col-md-4 d-flex gap-2">
+        <button class="btn btn-signal flex-grow-1" type="submit"><i class="bi bi-search"></i> Search</button>
+        <button class="btn btn-outline-dark" type="button" id="busSearchReset">Show all</button>
+      </div>
+    </form>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 mb-2 gap-2">
+      <h2 class="h4 mb-0" id="busResultTitle">All buses</h2>
+      <input id="busQuickFilter" class="form-control form-control-sm quick-filter" placeholder="Filter results as you type">
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle bus-table">
+        <thead><tr><th>Bus</th><th>Route</th><th>Date</th><th>Time</th><th>Seats</th><th class="text-end">Fare</th><th></th></tr></thead>
+        <tbody id="busTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BOOK A SEAT (Seat Management + Passenger + Booking) -->
+  <section id="view-book" class="view d-none">
+    <div id="bookEmpty" class="empty-state">
+      <h2 class="h4">No bus selected</h2>
+      <p class="mb-3">Choose a bus from the search results to see its seats.</p>
+      <button class="btn btn-signal" data-view="buses">Find buses</button>
+    </div>
+
+    <div id="bookPanel" class="row g-4 d-none">
+      <div class="col-lg-6">
+        <div class="panel">
+          <div id="busSummary" class="bus-summary"></div>
+          <div class="seat-legend">
+            <span><i class="seat-key available"></i> Available</span>
+            <span><i class="seat-key booked"></i> Booked</span>
+            <span><i class="seat-key selected"></i> Your seat</span>
+          </div>
+          <div class="bus-body"><div class="driver"><i class="bi bi-circle"></i> Driver</div><div id="seatMap"></div></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="panel">
+          <h2 class="h4">Passenger details</h2>
+          <form id="bookingForm" novalidate>
+            <input type="hidden" name="Bus_ID" id="bookBusId">
+            <div class="mb-3">
+              <label class="form-label" for="Seat_Number">Seat</label>
+              <input class="form-control" id="Seat_Number" name="Seat_Number" readonly required placeholder="Pick a seat on the map">
+              <div class="invalid-feedback">Pick a seat on the map.</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="Passenger_Name">Full name</label>
+              <input class="form-control" id="Passenger_Name" name="Passenger_Name" required>
+              <div class="invalid-feedback">Enter the passenger's name.</div>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="Phone">Phone</label>
+                <input class="form-control" id="Phone" name="Phone" placeholder="+94771234567" required data-pattern="\+?[0-9]{9,15}">
+                <div class="invalid-feedback">Use 9-15 digits, optionally starting with +.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="Email">Email</label>
+                <input class="form-control" id="Email" name="Email" type="email" required data-pattern="[^\s@]+@[^\s@]+\.[^\s@]+">
+                <div class="invalid-feedback">Enter a valid email address.</div>
+              </div>
+            </div>
+            <div class="mb-3 mt-3">
+              <label class="form-label" for="Boarding_Point">Boarding point</label>
+              <input class="form-control" id="Boarding_Point" name="Boarding_Point" required>
+              <div class="invalid-feedback">Enter a boarding point.</div>
+            </div>
+            <button class="btn btn-signal w-100" type="submit">Confirm booking</button>
+          </form>
+          <div id="ticket" class="ticket d-none"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MY BOOKINGS (Booking Search + update + cancel) -->
+  <section id="view-bookings" class="view d-none">
+    <form id="bookingSearchForm" class="search-bar row g-2 align-items-end" novalidate>
+      <div class="col-12 col-md-3">
+        <label class="form-label" for="bookingSearchType">Search by</label>
+        <select id="bookingSearchType" class="form-select"></select>
+      </div>
+      <div class="col-12 col-md-5">
+        <label class="form-label" for="bookingSearchValue">Value</label>
+        <input id="bookingSearchValue" class="form-control" autocomplete="off">
+      </div>
+      <div class="col-12 col-md-4 d-flex gap-2">
+        <button class="btn btn-signal flex-grow-1" type="submit"><i class="bi bi-search"></i> Search</button>
+        <button class="btn btn-outline-dark" type="button" id="bookingSearchReset">Show all</button>
+      </div>
+    </form>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 mb-2 gap-2">
+      <h2 class="h4 mb-0" id="bookingResultTitle">All bookings</h2>
+      <input id="bookingQuickFilter" class="form-control form-control-sm quick-filter" placeholder="Filter results as you type">
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>Booking</th><th>Passenger</th><th>Contact</th><th>Bus</th><th>Date</th><th>Seat</th><th>Status</th><th></th></tr></thead>
+        <tbody id="bookingTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MANAGE BUSES (Bus, Route, Schedule management) -->
+  <section id="view-admin" class="view d-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="h4 mb-0">Manage buses</h2>
+      <button class="btn btn-signal" id="toggleAddBus"><i class="bi bi-plus-lg"></i> Add a bus</button>
+    </div>
+    <div id="addBusPanel" class="panel mb-4" style="display:none">
+      <form id="addBusForm" class="row g-3" novalidate>
+        <div class="col-md-3"><label class="form-label" for="a_Bus_ID">Bus ID <span class="text-muted">(optional)</span></label><input class="form-control" id="a_Bus_ID" name="Bus_ID" placeholder="Auto-generated"></div>
+        <div class="col-md-5"><label class="form-label" for="a_Bus_Name">Bus name</label><input class="form-control" id="a_Bus_Name" name="Bus_Name" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-2"><label class="form-label" for="a_Total_Seats">Seats</label><input class="form-control" id="a_Total_Seats" name="Total_Seats" type="number" min="1" data-type="number" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-2"><label class="form-label" for="a_Fare">Fare (LKR)</label><input class="form-control" id="a_Fare" name="Fare" type="number" min="0" step="0.01" data-type="number" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="a_Departure">Departure</label><input class="form-control" id="a_Departure" name="Departure" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="a_Destination">Destination</label><input class="form-control" id="a_Destination" name="Destination" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="a_Route">Route</label><input class="form-control" id="a_Route" name="Route" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="a_Travel_Date">Travel date</label><input class="form-control" id="a_Travel_Date" name="Travel_Date" type="date" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="a_Departure_Time">Departure time</label><input class="form-control" id="a_Departure_Time" name="Departure_Time" type="time" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="a_Arrival_Time">Arrival time</label><input class="form-control" id="a_Arrival_Time" name="Arrival_Time" type="time" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-12"><button class="btn btn-signal" type="submit">Save bus</button></div>
+      </form>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle bus-table">
+        <thead><tr><th>Bus</th><th>Route</th><th>Date</th><th>Time</th><th>Seats</th><th class="text-end">Fare</th><th></th></tr></thead>
+        <tbody id="adminBusTable"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- Edit booking modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog"><div class="modal-content">
+    <form id="editBookingForm" novalidate>
+      <div class="modal-header"><h2 class="modal-title h5">Update booking <span id="eb_title"></span></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <input type="hidden" name="Booking_ID" id="eb_id">
+        <div class="mb-3"><label class="form-label" for="eb_Passenger_Name">Full name</label><input class="form-control" id="eb_Passenger_Name" name="Passenger_Name" required><div class="invalid-feedback">Required.</div></div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6"><label class="form-label" for="eb_Phone">Phone</label><input class="form-control" id="eb_Phone" name="Phone" required data-pattern="\+?[0-9]{9,15}"><div class="invalid-feedback">Use 9-15 digits.</div></div>
+          <div class="col-md-6"><label class="form-label" for="eb_Email">Email</label><input class="form-control" id="eb_Email" name="Email" required data-pattern="[^\s@]+@[^\s@]+\.[^\s@]+"><div class="invalid-feedback">Enter a valid email.</div></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="eb_Boarding_Point">Boarding point</label><input class="form-control" id="eb_Boarding_Point" name="Boarding_Point" required><div class="invalid-feedback">Required.</div></div>
+          <div class="col-md-6"><label class="form-label" for="eb_Seat_Number">Seat</label><input class="form-control" id="eb_Seat_Number" name="Seat_Number" required><div class="invalid-feedback">Required.</div></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button><button class="btn btn-signal" type="submit">Save changes</button></div>
+    </form>
+  </div></div>
+</div>
+
+<!-- Edit bus modal: details and schedule are saved separately -->
+<div class="modal fade" id="busModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title h5">Edit bus <span id="eb_bus_title"></span></h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body">
+      <form id="busDetailsForm" class="row g-3 mb-4" novalidate>
+        <h3 class="h6 col-12 mb-0">Bus details</h3>
+        <input type="hidden" name="Bus_ID" id="ed_Bus_ID">
+        <div class="col-md-6"><label class="form-label" for="ed_Bus_Name">Bus name</label><input class="form-control" id="ed_Bus_Name" name="Bus_Name" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-3"><label class="form-label" for="ed_Total_Seats">Seats</label><input class="form-control" id="ed_Total_Seats" name="Total_Seats" type="number" min="1" data-type="number" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-3"><label class="form-label" for="ed_Fare">Fare (LKR)</label><input class="form-control" id="ed_Fare" name="Fare" type="number" min="0" step="0.01" data-type="number" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="ed_Route">Route</label><input class="form-control" id="ed_Route" name="Route" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="ed_Departure">Departure</label><input class="form-control" id="ed_Departure" name="Departure" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="ed_Destination">Destination</label><input class="form-control" id="ed_Destination" name="Destination" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-12"><button class="btn btn-signal" type="submit">Save details</button></div>
+      </form>
+      <form id="busScheduleForm" class="row g-3" novalidate>
+        <h3 class="h6 col-12 mb-0">Schedule</h3>
+        <input type="hidden" name="Bus_ID" id="es_Bus_ID">
+        <div class="col-md-4"><label class="form-label" for="es_Travel_Date">Travel date</label><input class="form-control" id="es_Travel_Date" name="Travel_Date" type="date" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="es_Departure_Time">Departure time</label><input class="form-control" id="es_Departure_Time" name="Departure_Time" type="time" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-md-4"><label class="form-label" for="es_Arrival_Time">Arrival time</label><input class="form-control" id="es_Arrival_Time" name="Arrival_Time" type="time" required><div class="invalid-feedback">Required.</div></div>
+        <div class="col-12"><button class="btn btn-signal" type="submit">Save schedule</button></div>
+      </form>
+    </div>
+  </div></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
